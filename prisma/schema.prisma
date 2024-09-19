@@ -13,6 +13,8 @@ datasource db {
 model Jugador {
   id     Int    @id
   nombre String @unique
+
+  @@index([id])
 }
 
 model Fixture {
@@ -22,6 +24,8 @@ model Fixture {
   e2_j1    Int
   e2_j2    Int
   descansa Int
+
+  @@index([id])
 }
 
 model Partido {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import toast from 'svelte-french-toast';
+	import { toast } from 'svelte-sonner';
 	import axios from 'axios';
 	import { restarHoras } from '$lib/functions.js';
 	import { onMount } from 'svelte';

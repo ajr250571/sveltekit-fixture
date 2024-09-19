@@ -225,5 +225,7 @@ export const GET = async () => {
 	jugadores.sort((a, b) => b.ganados - a.ganados);
 	parejas.sort((a, b) => b.ganados - a.ganados);
 
-	return Response.json({ partidos, parejas, jugadores }, { status: 200 });
+	const partidosView = partidos.slice(0, 15);
+
+	return Response.json({ partidos: partidosView, parejas, jugadores }, { status: 200 });
 };

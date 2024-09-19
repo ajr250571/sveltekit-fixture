@@ -35,7 +35,7 @@ if (inicializarJugadores) {
 
 if (inicilizarFixture) {
 	await prisma.$queryRaw`
-		DELETE FROM fixture;
+		DELETE FROM fixture where 1=1;
 	`;
 	await prisma.$queryRaw`
 		INSERT INTO fixture (id, e1_j1, e1_j2, e2_j1, e2_j2, descansa) VALUES
@@ -59,7 +59,7 @@ if (inicilizarFixture) {
 
 if (rellenarPartidos) {
 	await prisma.$queryRaw`
-		DELETE FROM partido;
+		DELETE FROM partido where 1=1;
 	`;
 	for (let index = 0; index < 4; index++) {
 		await prisma.partido.createMany({

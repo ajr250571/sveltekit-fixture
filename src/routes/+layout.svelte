@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Navbar from '$lib/componentes/Navbar.svelte';
 	import '../app.css';
-	import { Toaster } from 'svelte-french-toast';
+	import { Toaster } from 'svelte-sonner';
 </script>
 
 <svelte:head>
@@ -11,7 +11,7 @@
 	/>
 </svelte:head>
 
-<Toaster />
+<Toaster richColors expand={true} />
 <div class="container mx-auto min-h-screen">
 	<Navbar />
 	<slot><!-- optional fallback --></slot>

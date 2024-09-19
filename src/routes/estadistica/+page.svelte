@@ -1,5 +1,5 @@
 <script lang="ts">
-	import axios from 'axios';
+	// import axios from 'axios';
 	import { onMount } from 'svelte';
 
 	interface Datos {
@@ -34,20 +34,33 @@
 	let partidosView: Partido[] = [];
 
 	onMount(async () => {
-		const { data, status } = await axios.get('/api/estadistica');
-		if (status !== 200) {
-			console.log(data);
-		} else {
-			datos = data;
-			partidosView = data.partidos.slice(0, 30);
-		}
+		let headersList = {
+			Accept: '*/*',
+			'User-Agent': 'Thunder Client (https://www.thunderclient.com)'
+		};
+
+		datos = await fetch('/api/estadistica', {
+			method: 'GET',
+			headers: headersList
+		}).then((res) => res.json());
+
+		// console.log(datos);
+		partidosView = datos.partidos.slice(0, 30);
+
+		//const { data, status } = await axios.get('/api/estadistica');
+		//if (status !== 200) {
+		//	console.log(data);
+		//} else {
+		//	datos = data;
+		//	partidosView = data.partidos.slice(0, 30);
+		//}
 	});
 </script>
 
 <div class="items-center justify-center px-2 mt-4">
 	{#if datos}
 		<h2 class="text-2xl mt-2">Ranking Jugadores</h2>
-		<div class="grid grid-cols-10 gap-y-1 mt-2 ml-4">
+		<div class="grid grid-cols-10 gap-y-3 mt-4 ml-4">
 			<div class="col-span-1 bbw font-bold text-sm text-center">ID</div>
 			<div class="col-span-3 bbw font-bold text-sm">Jugador</div>
 			<div class="col-span-3 bbw font-bold text-sm text-center">Jugados</div>
@@ -62,7 +75,7 @@
 			{/if}
 		</div>
 		<h2 class="text-2xl mt-2">Ranking Parejas</h2>
-		<div class="grid grid-cols-9 gap-y-1 mt-2 ml-4">
+		<div class="grid grid-cols-9 gap-y-3 mt-4 ml-4">
 			<div class="col-span-3 bbw font-bold text-sm">Pareja</div>
 			<div class="col-span-3 bbw font-bold text-sm text-center">Jugados</div>
 			<div class="col-span-3 bbw font-bold text-sm text-center">Ganados</div>
@@ -74,6 +87,8 @@
 				{/each}
 			{/if}
 		</div>
+
+		<!-- 
 		<h2 class="text-2xl mt-2">Partidos Jugados (Ultimos 30)</h2>
 		<div class="grid grid-cols-10 gap-y-0.5 mt-2 ml-4">
 			<div class="col-span-1 font-bold text-sm bbw text-center">Par.</div>
@@ -103,7 +118,8 @@
 					<div class="col-span-2 text-sm bbw text-center">{partido.descansa}</div>
 				{/each}
 			{/if}
-		</div>
+		</div> 
+		-->
 	{/if}
 </div>
 
