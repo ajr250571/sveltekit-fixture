@@ -1,6 +1,10 @@
 import prisma from '$lib/prisma';
+import type { RequestHandler } from './$types';
 
-export const GET = async () => {
+export const GET: RequestHandler = async (event) => {
+	const inicio = Number(event.url.searchParams.get('inicio')) || 0;
+	let fin = Number(event.url.searchParams.get('fin')) || 0;
+
 	interface Jugadores {
 		id: number;
 		nombre: string;
@@ -77,10 +81,21 @@ export const GET = async () => {
 		return Response.json({ error: 'Error al obtener los Fixtures' }, { status: 500 });
 	}
 
-	const currentMonth = new Date().getMonth() + 1;
-	const currentYear = new Date().getFullYear();
-	const currentMonthStart = new Date(currentYear, currentMonth - 1, 1);
-	const currentMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59);
+	// const currentMonth = new Date().getMonth() + 1;
+	// const currentYear = new Date().getFullYear();
+	// const currentMonthStart = new Date(currentYear, currentMonth - 1, 1);
+	// const currentMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59);
+	// lte: currentMonthEnd
+
+	const temporada = 'T2410';
+	const dataTemporada = await prisma.temporada.findFirst({
+		where: {
+			nombre: temporada
+		}
+	});
+
+	const fechaInicial = dataTemporada?.fecha_inicial;
+	const fechaFinal = dataTemporada?.fecha_final;
 
 	let partidosData: PartidosData[] = [];
 
@@ -88,8 +103,8 @@ export const GET = async () => {
 		partidosData = await prisma.partido.findMany({
 			where: {
 				fecha: {
-					gte: currentMonthStart,
-					lte: currentMonthEnd
+					gte: fechaInicial,
+					lte: fechaFinal
 				}
 			},
 			orderBy: {
@@ -162,12 +177,11 @@ export const GET = async () => {
 				}
 			}
 		});
+
 		// ranking parejas
 
 		// pregunto si la pareja existe
-		const pareja1Existe = parejas.find((pareja) => {
-			return pareja.nombre === equipo1;
-		});
+		const pareja1Existe = parejas.find((pareja) => pareja.nombre === equipo1);
 		if (pareja1Existe) {
 			parejas.find((pareja) => {
 				if (pareja.nombre === equipo1) {
@@ -193,14 +207,12 @@ export const GET = async () => {
 			}
 		}
 
-		const pareja2Existe = parejas.find((pareja) => {
-			return pareja.nombre === equipo2;
-		});
+		const pareja2Existe = parejas.find((pareja) => pareja.nombre === equipo2);
 		if (pareja2Existe) {
 			parejas.find((pareja) => {
 				if (pareja.nombre === equipo2) {
 					pareja.jugados += 1;
-					if (partido.equipo_ganador === 1) {
+					if (partido.equipo_ganador === 2) {
 						pareja.ganados += 1;
 					}
 				}
@@ -224,8 +236,12 @@ export const GET = async () => {
 
 	jugadores.sort((a, b) => b.ganados - a.ganados);
 	parejas.sort((a, b) => b.ganados - a.ganados);
-
-	const partidosView = partidos.slice(0, 15);
-
+	let partidosView: Partidos[] = [];
+	if (fin > 0) {
+		if (fin > partidos.length) {
+			fin = partidos.length;
+		}
+		partidosView = partidos.slice(inicio, fin);
+	}
 	return Response.json({ partidos: partidosView, parejas, jugadores }, { status: 200 });
 };

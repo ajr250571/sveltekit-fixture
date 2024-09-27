@@ -8,7 +8,7 @@ const inicializarJugadores = true;
 const inicilizarFixture = true;
 const rellenarPartidos = true;
 
-// SELECT p.*, f.*, j1.nombre AS e1_j1_nombre, j2.nombre AS e1_j2_nombre, j3.nombre AS e2_j1_nombre, j4.nombre AS e2_j2_nombre, j5.nombre AS descansa_nombre FROM partido p, fixture f, jugador j1, jugador j2, jugador j3, jugador j4, jugador j5 WHERE p.fixtureId=f.id AND f.e1_j1=j1.id AND f.e1_j2=j2.id AND f.e2_j1=j3.id AND f.e2_j2=j4.id AND f.descansa=j5.id
+/* 
 function restarHoras(fechaActual, horasARestar) {
 	// Obtener la fecha en milisegundos
 	const milisegundos = fechaActual.getTime();
@@ -17,7 +17,8 @@ function restarHoras(fechaActual, horasARestar) {
 	// Restar los milisegundos y crear una nueva fecha
 	const nuevaFecha = new Date(milisegundos - milisegundosARestar);
 	return nuevaFecha;
-}
+} 
+*/
 
 if (inicializarJugadores) {
 	await prisma.$queryRaw`
@@ -61,6 +62,10 @@ if (rellenarPartidos) {
 	await prisma.$queryRaw`
 		DELETE FROM partido where 1=1;
 	`;
+	await prisma.$queryRaw`
+		ALTER TABLE partido AUTO_INCREMENT = 0;
+	`;
+	/* 
 	for (let index = 0; index < 4; index++) {
 		await prisma.partido.createMany({
 			data: [
@@ -141,5 +146,6 @@ if (rellenarPartidos) {
 				}
 			]
 		});
-	}
+	} 
+	*/
 }

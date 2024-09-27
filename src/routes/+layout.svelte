@@ -11,7 +11,7 @@
 	/>
 </svelte:head>
 
-<Toaster richColors expand={true} />
+<Toaster richColors />
 <div class="container mx-auto min-h-screen">
 	<Navbar />
 	<slot><!-- optional fallback --></slot>

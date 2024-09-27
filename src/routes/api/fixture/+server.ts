@@ -13,6 +13,12 @@ export const GET = async () => {
 		descansa_nombre?: string;
 		jugado?: number;
 	}
+	interface Partidos {
+		id: number;
+		fixtureId: number;
+		fecha: Date;
+		equipo_ganador: number;
+	}
 
 	const jugadores = await prisma.jugador.findMany({
 		orderBy: {
@@ -20,33 +26,45 @@ export const GET = async () => {
 		}
 	});
 
-	const currentMonth = new Date().getMonth() + 1;
-	const currentYear = new Date().getFullYear();
-	const currentMonthStart = new Date(currentYear, currentMonth - 1, 1);
-	const currentMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59);
+	// const currentMonth = new Date().getMonth() + 1;
+	// const currentYear = new Date().getFullYear();
+	// const currentMonthStart = new Date(currentYear, currentMonth - 1, 1);
+	// const currentMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59);
+	// lte: currentMonthEnd
 
-	const partidosPorFixture = await prisma.partido.groupBy({
-		by: ['fixtureId'],
+	const temporada = 'T2410';
+
+	const dataTemporada = await prisma.temporada.findFirst({
 		where: {
-			fecha: {
-				gte: currentMonthStart,
-				lte: currentMonthEnd
-			}
-		},
-		orderBy: {
-			fixtureId: 'asc'
-		},
-		_count: {
-			id: true
+			nombre: temporada
 		}
 	});
+
+	const fechaInicial = dataTemporada?.fecha_inicial;
+	const fechaFinal = dataTemporada?.fecha_final;
+
+	let partidos: Partidos[] = [];
+	try {
+		partidos = await prisma.partido.findMany({
+			where: {
+				fecha: {
+					gte: fechaInicial,
+					lte: fechaFinal
+				}
+			},
+			orderBy: {
+				fecha: 'asc'
+			}
+		});
+	} catch (error) {
+		console.log(error);
+		return Response.json({ error: 'Error al obtener los Partidos' }, { status: 500 });
+	}
 
 	const fixtures: Fixtures[] = [];
 	const fixtureActual: Fixtures[] = await prisma.fixture.findMany();
 
 	fixtureActual.forEach(async (partido) => {
-		const partidos_jugados = partidosPorFixture.find((item) => item.fixtureId === partido.id)
-			?._count.id;
 		let equipo1: string = '';
 		let equipo2: string = '';
 		let descansa_nombre: string = '';
@@ -68,18 +86,23 @@ export const GET = async () => {
 			equipo1: equipo1,
 			equipo2: equipo2,
 			descansa_nombre: descansa_nombre,
-			jugado: partidos_jugados ?? 0
+			jugado: 0
 		});
 	});
 
-	fixtures.forEach(async (partido) => {
-		const partidos = await prisma.partido.findMany({
-			where: {
-				fixtureId: partido.id
-			}
-		});
-		partido.jugado = partidos.length ?? 0;
+	const partidosById = partidos.reduce(
+		(acc, partido) => {
+			acc[partido.fixtureId] = (acc[partido.fixtureId] ?? 0) + 1;
+			return acc;
+		},
+		{} as Record<number, number>
+	);
 
+	fixtures.forEach((fixture) => {
+		fixture.jugado = partidosById[fixture.id] ?? 0;
+	});
+
+	fixtures.forEach(async (partido) => {
 		jugadores.filter(async (jugador) => {
 			if (jugador.id === partido.e1_j1) {
 				partido.equipo1 = jugador.nombre.substring(0, 3) + '/';

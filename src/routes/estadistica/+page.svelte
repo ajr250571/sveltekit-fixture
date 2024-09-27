@@ -1,5 +1,4 @@
 <script lang="ts">
-	// import axios from 'axios';
 	import { onMount } from 'svelte';
 
 	interface Datos {
@@ -33,34 +32,18 @@
 	let datos: Datos;
 	let partidosView: Partido[] = [];
 
+	const inicio = 0;
+	const fin = 500;
 	onMount(async () => {
-		let headersList = {
-			Accept: '*/*',
-			'User-Agent': 'Thunder Client (https://www.thunderclient.com)'
-		};
-
-		datos = await fetch('/api/estadistica', {
-			method: 'GET',
-			headers: headersList
-		}).then((res) => res.json());
-
-		// console.log(datos);
-		partidosView = datos.partidos.slice(0, 30);
-
-		//const { data, status } = await axios.get('/api/estadistica');
-		//if (status !== 200) {
-		//	console.log(data);
-		//} else {
-		//	datos = data;
-		//	partidosView = data.partidos.slice(0, 30);
-		//}
+		datos = await fetch(`/api/estadistica?inicio=${inicio}&fin=${fin}`).then((res) => res.json());
+		partidosView = datos.partidos;
 	});
 </script>
 
 <div class="items-center justify-center px-2 mt-4">
 	{#if datos}
 		<h2 class="text-2xl mt-2">Ranking Jugadores</h2>
-		<div class="grid grid-cols-10 gap-y-3 mt-4 ml-4">
+		<div class="grid grid-cols-10 gap-y-3 mt-4 ml-2">
 			<div class="col-span-1 bbw font-bold text-sm text-center">ID</div>
 			<div class="col-span-3 bbw font-bold text-sm">Jugador</div>
 			<div class="col-span-3 bbw font-bold text-sm text-center">Jugados</div>
@@ -74,52 +57,55 @@
 				{/each}
 			{/if}
 		</div>
-		<h2 class="text-2xl mt-2">Ranking Parejas</h2>
-		<div class="grid grid-cols-9 gap-y-3 mt-4 ml-4">
-			<div class="col-span-3 bbw font-bold text-sm">Pareja</div>
-			<div class="col-span-3 bbw font-bold text-sm text-center">Jugados</div>
-			<div class="col-span-3 bbw font-bold text-sm text-center">Ganados</div>
-			{#if datos.parejas}
+		{#if datos.parejas.length > 0}
+			<h2 class="text-2xl mt-2">Ranking Parejas</h2>
+			<div class="grid grid-cols-9 gap-y-3 mt-4 ml-2">
+				<div class="col-span-3 bbw font-bold text-sm">Pareja</div>
+				<div class="col-span-3 bbw font-bold text-sm text-center">Jugados</div>
+				<div class="col-span-3 bbw font-bold text-sm text-center">Ganados</div>
 				{#each datos.parejas as pareja}
 					<div class="col-span-3 bbw text-sm">{pareja.nombre}</div>
 					<div class="col-span-3 bbw text-sm text-center">{pareja.jugados}</div>
 					<div class="col-span-3 bbw text-sm text-center">{pareja.ganados}</div>
 				{/each}
-			{/if}
-		</div>
-
-		<!-- 
-		<h2 class="text-2xl mt-2">Partidos Jugados (Ultimos 30)</h2>
-		<div class="grid grid-cols-10 gap-y-0.5 mt-2 ml-4">
-			<div class="col-span-1 font-bold text-sm bbw text-center">Par.</div>
-			<div class="col-span-1 font-bold text-sm bbw text-center">Fix.</div>
-			<div class="col-span-3 font-bold text-sm bbw text-center">Equipo 1</div>
-			<div class="col-span-3 font-bold text-sm bbw text-center">Equipo 2</div>
-			<div class="col-span-2 font-bold text-sm bbw text-center">Des.</div>
-			{#if partidosView}
-				{#each partidosView as partido}
-					<div class="col-span-1 text-sm bbw text-center">{partido.id}</div>
-					<div class="col-span-1 text-sm bbw text-center">{partido.fixtureId}</div>
-					{#if partido.equipo_ganador === 1}
-						<div class="col-span-3 text-sm font-bold bbw text-black bg-green-300 text-center">
-							{partido.equipo1}
-						</div>
-						<div class="col-span-3 text-sm bbw text-black bg-red-300 text-center">
-							{partido.equipo2}
-						</div>
-					{:else}
-						<div class="col-span-3 text-sm bbw text-black bg-red-300 text-center">
-							{partido.equipo1}
-						</div>
-						<div class="col-span-3 text-sm font-bold bbw text-black bg-green-300 text-center">
-							{partido.equipo2}
-						</div>
-					{/if}
-					<div class="col-span-2 text-sm bbw text-center">{partido.descansa}</div>
-				{/each}
-			{/if}
-		</div> 
-		-->
+			</div>
+		{/if}
+		{#if datos.partidos.length > 0}
+			<h2 class="text-2xl mt-2">Partidos Jugados (Ultimos {datos.partidos.length})</h2>
+			<div class="grid grid-cols-12 gap-y-0.5 mt-2 ml-2">
+				<div class="col-span-1 font-bold text-sm bbw text-center">Par.</div>
+				<div class="col-span-1 font-bold text-sm bbw text-center">Fix.</div>
+				<div class="col-span-3 font-bold text-sm bbw text-center">Equipo 1</div>
+				<div class="col-span-3 font-bold text-sm bbw text-center">Equipo 2</div>
+				<div class="col-span-2 font-bold text-sm bbw text-center">Des.</div>
+				<div class="col-span-2 font-bold text-sm bbw text-center">Fecha</div>
+				{#if partidosView}
+					{#each partidosView as partido}
+						<div class="col-span-1 text-sm bbw text-center">{partido.id}</div>
+						<div class="col-span-1 text-sm bbw text-center">{partido.fixtureId}</div>
+						{#if partido.equipo_ganador === 1}
+							<div class="col-span-3 text-sm font-bold bbw text-black bg-green-300 text-center">
+								{partido.equipo1}
+							</div>
+							<div class="col-span-3 text-sm bbw text-black bg-red-300 text-center">
+								{partido.equipo2}
+							</div>
+						{:else}
+							<div class="col-span-3 text-sm bbw text-black bg-red-300 text-center">
+								{partido.equipo1}
+							</div>
+							<div class="col-span-3 text-sm font-bold bbw text-black bg-green-300 text-center">
+								{partido.equipo2}
+							</div>
+						{/if}
+						<div class="col-span-2 text-sm bbw text-center">{partido.descansa}</div>
+						<p class="col-span-2 text-sm bbw text-center">
+							{partido.fecha.toString().substr(8, 2) + ' ' + partido.fecha.toString().substr(11, 5)}
+						</p>
+					{/each}
+				{/if}
+			</div>
+		{/if}
 	{/if}
 </div>
 

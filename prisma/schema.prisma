@@ -37,3 +37,12 @@ model Partido {
   @@index([fixtureId])
   @@index([fecha])
 }
+
+model Temporada {
+  id            Int      @id @default(autoincrement())
+  nombre        String
+  fecha_inicial DateTime
+  fecha_final   DateTime
+
+  @@index([nombre])
+}

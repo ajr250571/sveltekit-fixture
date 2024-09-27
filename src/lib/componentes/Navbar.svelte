@@ -8,7 +8,7 @@
 	<div class="navbar-end flex">
 		<ul class="menu menu-horizontal px-1">
 			<li><a href="/partido">Partidos</a></li>
-			<li><a href="/estadistica">Estadisticas</a></li>
+			<li><a href="/estadistica">Estadistica</a></li>
 		</ul>
 	</div>
 </div>
